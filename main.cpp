@@ -30,14 +30,160 @@ void quicksort(int p[], int in[], int start, int _end)
     quicksort(p, in, start, pivot - 1);
     quicksort(p, in, pivot + 1, _end);
 }
+void cross(int fights, int m, int cross_switch, int **children, int **parents)
+{
+    int i, j, k, p, splitter, splitter2;
+    if (cross_switch == 1)
+        {
+            for (i = 0, k = 0; k < fights; i++, k += 2)
+            {
+                splitter = 1 + rand() % 9;
+                for (j = 0; j < splitter; j++)
+                {
+                    children[i][j] = parents[k][j];
+                }
+                for (j = splitter; j < m; j++)
+                {
+                    children[i][j] = parents[k + 1][j];
+                }
+            }
+        }
+        if (cross_switch == 2)
+        {
+            for (i = 0, k = 0; k < fights; i++, k+=2)
+            {
+                splitter = 1 + rand() % 9;
+                splitter2 = 1 + rand() % 9;
+                if (splitter < splitter2)
+                {
+                     for (j = 0; j < splitter; j++)
+                    {
+                        children[i][j] = parents[k][j];
+                    }
+                    for (j = splitter; j < splitter2; j++)
+                    {
+                        children[i][j] = parents[k + 1][j];
+                    }
+                    for (j = splitter2; j < m; j++)
+                    {
+                        children[i][j] = parents[k][j];
+                    }
+                }
+                if (splitter2 < splitter)
+                {
+                     for (j = 0; j < splitter2; j++)
+                    {
+                        children[i][j] = parents[k][j];
+                    }
+                    for (j = splitter2; j < splitter; j++)
+                    {
+                        children[i][j] = parents[k + 1][j];
+                    }
+                    for (j = splitter; j < m; j++)
+                    {
+                        children[i][j] = parents[k][j];
+                    }
+                }
+               if (splitter == splitter2)
+               {
+                   k-=2;
+                   i--;
+                   continue;
+               }
+            }
+        }
+        if (cross_switch == 3)
+        {
+            for (i = 0, k = 0; k < fights; i++, k+=2)
+            {
+                for (j = 0; j < m; j++)
+                {
+                    p = rand()%2;
+                    children[i][j] = parents[k+p][j];
+                }
+            }
+        }
+}
+void mutation(string mut_switch, int fights, int m, int **children)
+{
+    float mut, p_weak = 1./3.*m, p_average = 1./m, p_strong = 3./m;
+    int i, j;
+    if(mut_switch == "weak"){
+
+            for (i = 0;i< fights;i++)
+            {
+                for (j = 0; j<m;j++)
+                {
+                     mut = ((double) rand() / (double)(RAND_MAX));
+                    if (mut <= p_weak)
+                    {
+                        if (children[i][j] == 0)
+                            children[i][j] = 1;
+                        if (children[i][j] == 1)
+                            children[i][j] = 0;
+                    }
+                }
+            }
+        }
+        if(mut_switch == "average"){
+
+            for (i = 0;i< fights;i++)
+            {
+                for (j = 0; j<m;j++)
+                {
+                     mut = ((double) rand() / (RAND_MAX));
+                    if (mut <= p_average)
+                    {
+                        if (children[i][j] == 0)
+                            children[i][j] = 1;
+                        if (children[i][j] == 1)
+                            children[i][j] = 0;
+                    }
+                }
+            }
+        }
+        if(mut_switch == "strong"){
+
+            for (i = 0;i< fights;i++)
+            {
+                for (j = 0; j<m;j++)
+                {
+                     mut = ((double) rand() / (RAND_MAX));
+                    if (mut <= p_strong)
+                    {
+                        if (children[i][j] == 0)
+                            children[i][j] = 1;
+                        if (children[i][j] == 1)
+                            children[i][j] = 0;
+                    }
+                }
+            }
+        }
+}
+void cout_popul(int globali, int **A, int n, int m)
+{
+    int i, j;
+     cout << "Population" << globali << endl;
+        for (i = 0; i < n; i++)
+        {
+            for (j = 0; j < m; j++)
+            {
+                cout.width(4);
+                cout << A[i][j];
+            }
+            cout << endl;
+        }
+}
 
 int main()
 {
 	setlocale(0, "");
 	srand(time(NULL));
-	int n = 10, m = 10, i, j, in, k, candidate1, candidate2, winner, localpower = 0,
-	fights = n, splitter, globali, number_of_repeats = 10;
-	float mutation, p = 1./m;
+	int cross_switch = 3;//2, 3
+	string mut_switch = "weak";//average, strong
+	int n = 6, m = 10, i, j, in, k, candidate1, candidate2, winner, localpower = 0,
+	fights = n*2, splitter, splitter2, globali, number_of_repeats = 10, p;
+
 
 
 
@@ -55,8 +201,7 @@ int main()
 	for (i = 0; i < fights; i++)
 		children[i] = new int[m];
     int *index = new int[n + fights];
-
-
+    //инициализация
     for (i = 0; i < n; i++)
 		for (j = 0; j < m; j++)
 			A1[i][j] = rand() % 2;
@@ -70,7 +215,7 @@ int main()
 		}
 		cout << endl;
 	}
-	//тут наверное глобальный цикл
+	//глобальный цикл
 	for (globali = 1; globali < number_of_repeats; globali+=2)
     {
         for (i = 0; i < n; i++)
@@ -82,7 +227,7 @@ int main()
             power[i] = localpower;
             localpower = 0;
         }
-
+        //турнирные бои
         for (int fight = 0; fight < fights; fight++)
         {
             candidate1 = rand() % n;
@@ -109,34 +254,10 @@ int main()
 
             }
         }
-        for (i = 0; i < fights; i+=2)
-        {
-            splitter = 1 + rand() % 9;
-            for (j = 0; j < splitter; j++)
-            {
-                children[i][j] = parents[i][j];
-                children[i+1][j] = parents[i+1][j];
-            }
-            for (j = splitter; j < m; j++)
-            {
-                children[i][j] = parents[i + 1][j];
-                children[i+1][j] = parents[i][j];
-            }
-        }
-        for (i = 0;i< fights;i++)
-        {
-            for (j = 0; j<m;j++)
-            {
-                 mutation = ((double) rand() / (RAND_MAX));
-                if (mutation <= p)
-                {
-                    if (children[i][j] == 0)
-                        children[i][j] = 1;
-                    if (children[i][j] == 1)
-                        children[i][j] = 0;
-                }
-            }
-        }
+        //скрещивание
+        cross(fights, m, cross_switch, children, parents);
+        //мутация
+        mutation(mut_switch, fights, m, children);
         for (i = 0; i < fights; i++)
         {
             for (j = 0; j < m; j++)
@@ -149,6 +270,7 @@ int main()
         for (i = 0; i < fights + n; i++)
             index[i] = i;
         quicksort(power, index, 0, n + fights - 1);
+        //создание новой популяции
         for (i = 0, k = fights + n-1; i < n; i++,k--)
         {
             in = index[k];
@@ -164,16 +286,7 @@ int main()
                     A2[i][j] = children [in][j];
             }
         }
-        cout << "Population" << globali << endl;
-        for (i = 0; i < n; i++)
-        {
-            for (j = 0; j < m; j++)
-            {
-                cout.width(4);
-                cout << A2[i][j];
-            }
-            cout << endl;
-        }
+       cout_popul(globali, A2, n, m);
         for (i = 0; i < n; i++)
         {
             for (j = 0; j < m; j++)
@@ -183,7 +296,7 @@ int main()
             power[i] = localpower;
             localpower = 0;
         }
-
+        //турнирные бои
         for (int fight = 0; fight < fights; fight++)
         {
             candidate1 = rand() % n;
@@ -210,34 +323,11 @@ int main()
 
             }
         }
-        for (i = 0; i < fights; i+=2)
-        {
-            splitter = 1 + rand() % 9;
-            for (j = 0; j < splitter; j++)
-            {
-                children[i][j] = parents[i][j];
-                children[i+1][j] = parents[i+1][j];
-            }
-            for (j = splitter; j < m; j++)
-            {
-                children[i][j] = parents[i + 1][j];
-                children[i+1][j] = parents[i][j];
-            }
-        }
-        for (i = 0;i< fights;i++)
-        {
-            for (j = 0; j<m;j++)
-            {
-                 mutation = ((double) rand() / (RAND_MAX));
-                if (mutation <= p)
-                {
-                    if (children[i][j] == 0)
-                        children[i][j] = 1;
-                    if (children[i][j] == 1)
-                        children[i][j] = 0;
-                }
-            }
-        }
+        //скрещивание
+        cross(fights, m, cross_switch, children, parents);
+        //мутации
+        mutation(mut_switch, fights, m, children);
+        //определение силы
         for (i = 0; i < fights; i++)
         {
             for (j = 0; j < m; j++)
@@ -250,6 +340,7 @@ int main()
         for (i = 0; i < fights + n; i++)
             index[i] = i;
         quicksort(power, index, 0, n + fights - 1);
+        //создание новой популяции
         for (i = 0, k = fights + n-1; i < n; i++,k--)
         {
             in = index[k];
@@ -265,16 +356,7 @@ int main()
                     A1[i][j] = children [in][j];
             }
         }
-        cout << "Population" << globali+1 << endl;
-        for (i = 0; i < n; i++)
-        {
-            for (j = 0; j < m; j++)
-            {
-                cout.width(4);
-                cout << A1[i][j];
-            }
-            cout << endl;
-        }
+        cout_popul(globali, A1, n, m)
     }
 
 
