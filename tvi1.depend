@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1694241179 source:c:\codeblocks_projects\tvi1\main.cpp
+1696055629 source:c:\codeblocks_projects\tvi1\main.cpp
 	<iostream>
 	<ctime>
 	<algorithm>
