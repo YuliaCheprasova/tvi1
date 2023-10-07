@@ -237,13 +237,14 @@ void selection (string sel_switch, int *power, int fights, int n, int **parents,
             //cout << p[i] << endl;
             temp += (float)power[i]/((float)sumpower);
         }
-        randp = ((double) rand() / (RAND_MAX));
         for (fight = 0; fight < fights; fight++)
         {
+            randp = ((double) rand() / (RAND_MAX));
             if (0 <= randp < p[0])
             {
                 for (i = 0; i < m; i++)
                     parents[fight][i] = A[0][i];
+                continue;
             }
             for (j = 0; j < n-1; j++)
             {
@@ -251,6 +252,7 @@ void selection (string sel_switch, int *power, int fights, int n, int **parents,
                 {
                     for (i = 0; i < m; i++)
                         parents[fight][i] = A[j+1][i];
+                    break;
                 }
             }
         }
@@ -322,13 +324,15 @@ void selection (string sel_switch, int *power, int fights, int n, int **parents,
             //cout << p[i] << endl;
             temp += (float)rang[i]/((float)sumpower);
         }
-        randp = ((double) rand() / (RAND_MAX));
+
         for (fight = 0; fight < fights; fight++)
         {
+            randp = ((double) rand() / (RAND_MAX));
             if (0 <= randp < p[0])
             {
                 for (i = 0; i < m; i++)
                     parents[fight][i] = A[0][i];
+                continue;
             }
             for (j = 0; j < n-1; j++)
             {
@@ -336,6 +340,7 @@ void selection (string sel_switch, int *power, int fights, int n, int **parents,
                 {
                     for (i = 0; i < m; i++)
                         parents[fight][i] = A[j+1][i];
+                    break;
                 }
             }
         }
@@ -410,7 +415,7 @@ int main()
 {
 	setlocale(0, "");
 	srand(time(NULL));
-	string sel_switch = "tour";// prop, rang, tour
+	string sel_switch = "rang";// prop, rang, tour
 	int cross_switch = 1;//1, 2, 3
 	string mut_switch = "average";//weak, average, strong
 	int n = 250, m = 100, i, j, in, k, fights = n*2, globali, number_of_repeats = 500;
