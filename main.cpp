@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <cmath>
 
+
 using namespace std;
+const double pi = 3.141592653589793;
 
 int part(float p[], int in[], int start, int _end)
 {
@@ -268,7 +270,7 @@ void selection (string sel_switch, float *power, int fights, int n, int **parent
         for (fight = 0; fight < fights; fight++)
         {
             randp = ((double) rand() / (RAND_MAX));
-            if (0 <= randp < p[0])
+            if (randp >= 0&&randp < p[0])
             {
                 for (i = 0; i < m; i++)
                     parents[fight][i] = A[0][i];
@@ -276,7 +278,7 @@ void selection (string sel_switch, float *power, int fights, int n, int **parent
             }
             for (j = 0; j < n-1; j++)
             {
-                if (p[j] <= randp < p[j+1])
+                if (randp < p[j+1]&&randp >=p[j])
                 {
                     for (i = 0; i < m; i++)
                         parents[fight][i] = A[j+1][i];
@@ -439,19 +441,7 @@ void count_power2 (int n, int fights, int m, int *power, int **children)
         }
 }
 
-void rastr(float *x1, float *x2, float *power, bool parents, int n)
-{
-    for (int i = 0; i < n; i++)
-        {
-            if (parents)
-            power[i] = -(0.1*pow(x1[i],2)+0.1*pow(x2[i],2)-4*cos(0.8*x1[i])-4*cos(0.8*x2[i])+8);
-            else
-            power[i+n] = - (0.1*pow(x1[i+n],2)+0.1*pow(x2[i+n],2)-4*cos(0.8*x1[i+n])-4*cos(0.8*x2[i+n])+8);
-
-        }
-}
-
-void count_power(int **A, int n, int m, float h, int left, bool parents, float *x1, float *x2)
+void count_x(int **A, int n, int m, float h, int left, float *x1, float *x2, bool parents = false)
 {
     int temp = 0, i, j, k;
     for (i = 0; i < n; i++)
@@ -483,19 +473,138 @@ void count_power(int **A, int n, int m, float h, int left, bool parents, float *
     }
 }
 
+void func(float *x1, float *x2, float *power, int n, int kind_of_func, bool parents = false)
+{
+    int i, j = 0, k;
+    float ax, bx, zx1, zx2, sum;
+    int *a {new int[25]{ -32, -16, 0, 16, 32, -32, -16, 0, 16, 32, -32, -16, 0, 16, 32, -32, -16, 0, 16, 32, -32, -16, 0, 16, 32}};
+    int *b {new int[25]{ -32, -32, -32, -32, -32, -16, -16, -16, -16, -16,
+    0, 0, 0, 0, 0, 16, 16, 16, 16, 16, 32, 32, 32, 32, 32}};
+    if (parents == false)
+    {
+        j = n;
+        n = n*2;
+    }
+    if (kind_of_func == 1)
+        for (i = j; i < n; i++)
+            power[i] = -(0.1*x1[i]*x1[i]+0.1*x2[i]*x2[i]-4*cos(0.8*x1[i])-4*cos(0.8*x2[i])+8);
+    if (kind_of_func == 2)
+        for (i = j; i < n; i++)
+        {
+            ax = x1[i]*x1[i]*cos(pi/4.)-x2[i]*x2[i]*sin(pi/4.);
+            bx = x1[i]*x1[i]*sin(pi/4.)+x2[i]*x2[i]*cos(pi/4.);
+            power[i] = -(0.1*1.5*ax+0.1*0.8*bx-4*cos(0.8*1.5*ax)-4*cos(0.8*0.8*bx)+8);
+        }
+    if (kind_of_func == 3)
+        for (i = j; i < n; i++)
+            power[i] = -(100*(x2[i]-x1[i]*x1[i])*(x2[i]-x1[i]*x1[i])+(1-x1[i])*(1-x1[i]));
+    if (kind_of_func == 4)
+        for (i = j; i < n; i++)
+            power[i] = -((-10./(0.005*(x1[i]*x1[i]+x2[i]*x2[i])-cos(x1[i])*cos(x2[i]/sqrt(2))+2))+10);
+    if (kind_of_func == 5)
+        for (i = j; i < n; i++)
+            power[i] = -((-100./(100*(x1[i]*x1[i]-x2[i])*(x1[i]*x1[i]-x2[i])+(1-x1[i]*x1[i])*(1-x1[i]*x1[i])+1))+100);
+    if (kind_of_func == 6)
+        for (i = j; i < n; i++)
+            power[i] = -((-1+sin(sqrt(x1[i]*x1[i]+x2[i]*x2[i]))*sin(sqrt(x1[i]*x1[i]+x2[i]*x2[i])))/(1+0.001*(x1[i]*x1[i]+x2[i]*x2[i])));
+    if (kind_of_func == 7||kind_of_func == 8)
+        for (i = j; i < n; i++)
+            power[i] = -(0.5*(x1[i]*x1[i]+x2[i]*x2[i])*(1.6+0.8*cos(1.5*x1[i])*cos(3.14*x2[i])+0.8*cos(sqrt(5)*x1[i])*cos(3.5*x2[i])));
+    if (kind_of_func == 9)
+        for (i = j; i < n; i++)
+            power[i] = -(x1[i]*x1[i]*abs(sin(2*x1[i]))+x2[i]*x2[i]*abs(sin(2*x2[i]))-1/(5*x1[i]*x1[i]+5*x2[i]*x2[i]+0.2)+5);
+    if (kind_of_func == 10)
+        for (i = j; i < n; i++)
+            power[i] = -(0.5*(x1[i]*x1[i]+x1[i]*x2[i]+x2[i]*x2[i])*(1+0.5*cos(1.5*x1[i])*cos(3.2*x1[i]*x2[i])*cos(3.14*x2[i])+0.5*cos(2.2*x1[i])*cos(4.8*x1[i]*x2[i])*cos(3.5*x2[i])));
+    if (kind_of_func == 11)
+        for (i = j; i < n; i++)
+        {
+            zx1 = (1./((x1[i]-1)*(x1[i]-1)+0.2))+(1./(2*(x1[i]-2)*(x1[i]-2)+0.15))+(1./(3*(x1[i]-3)*(x1[i]-3)+0.3));
+            zx2 = (1./((x2[i]-1)*(x2[i]-1)+0.2))+(1./(2*(x2[i]-2)*(x2[i]-2)+0.15))+(1./(3*(x2[i]-3)*(x2[i]-3)+0.3));
+            power[i] = -(-zx1*zx2);
+        }
+    if (kind_of_func == 12)
+        for (i = j; i < n; i++)
+        {
+            zx1 = (1./((x1[i]-1)*(x1[i]-1)+0.2))+(1./(2*(x1[i]-2)*(x1[i]-2)+0.15))+(1./(3*(x1[i]-3)*(x1[i]-3)+0.3));
+            zx2 = (1./((x2[i]-1)*(x2[i]-1)+0.2))+(1./(2*(x2[i]-2)*(x2[i]-2)+0.15))+(1./(3*(x2[i]-3)*(x2[i]-3)+0.3));
+            power[i] = -(-(zx1+zx2));
+        }
+    if (kind_of_func == 13)
+    {
+        for (i = j; i < n; i++)
+        {
+            sum = 0;
+            for(k = 0; k < 25; k++)
+            {
+                sum += 1./((x1[i]-a[k])*(x1[i]-a[k])*(x1[i]-a[k])*(x1[i]-a[k])+(x2[i]-b[k])*(x2[i]-b[k])*(x2[i]-b[k])*(x2[i]-b[k]));
+            }
+            power[i] = -(1./(1./500.+sum));
+        }
+    }
+    delete[] a;
+    delete[] b;
+}
+
+
+void limits(float*left, float *right, int kind_of_func)
+{
+    if (kind_of_func == 1||kind_of_func == 2||kind_of_func == 4)
+    {
+        *left = -16;
+        *right = 16;
+    }
+    if (kind_of_func == 3)
+    {
+        *left = -2;
+        *right = 2;
+    }
+    if (kind_of_func == 5||kind_of_func == 6)
+    {
+        *left = -10;
+        *right = 10;
+    }
+    if (kind_of_func == 7)
+    {
+        *left = -2.5;
+        *right = 2.5;
+    }
+    if (kind_of_func == 8)
+    {
+        *left = -5;
+        *right = 5;
+    }
+    if (kind_of_func == 9)
+    {
+        *left = -4;
+        *right = 4;
+    }
+    if (kind_of_func == 10||kind_of_func == 11||kind_of_func == 12)
+    {
+        *left = 0;
+        *right = 4;
+    }
+    if (kind_of_func == 13)
+    {
+        *left = -65;
+        *right = 65;
+    }
+}
 
 int main()
 {
 	setlocale(0, "");
 	srand(time(NULL));
-	string sel_switch = "prop";// prop, rang, tour
-	int cross_switch = 1;//1, 2, 3
-	string mut_switch = "weak";//weak, average, strong
-	//int kind_of_func = 1;//1 - Растригина, 2 -
-	int n = 30, m = 0, s = 1, i, j, in, k, fights = n*2, globali, number_of_repeats = 80;
-	int left = -16, right = 16;
-    float e = 0.01, nparts, h;
+	string sel_switch = "rang";// prop, rang, tour
+	int cross_switch = 3;//1, 2, 3
+	string mut_switch = "average";//weak, average, strong
+	//плохо 2, 5, 13
+	int kind_of_func = 13;//1 - Растригина, 2 - Растригина овражная, 3 - Розенброка, 4 - Гриванка, 5 - Де Йонга, 6 - Сомбреро,
+	//7 - Катникова1, 8 - Катникова2, 9 - функция9, 10 - функция10, 11 - мультипликативная, 12 - аддитивная, 13 - лисьи норы
+	int n = 30, m = 0, s = 1, i, j, in, k, fights = n*2, globali, number_of_repeats = 100;
+	float left, right, e = 0.01, nparts, h;
 
+    limits(&left, &right, kind_of_func);
     nparts = (right - left)/e;
     while (s < nparts + 1)
     {
@@ -536,8 +645,8 @@ int main()
 		for (j = 0; j < m; j++)
 			A1[i][j] = rand() % 2;
 
-	count_power(A1, n, m, h, left, true, x1, x2);
-    rastr(x1, x2, power1, true, n);
+	count_x(A1, n, m, h, left, x1, x2, true);
+    func(x1, x2, power1, n, kind_of_func, true);
 	cout << "Population0" << endl;
 	for (i = 0; i < n; i++)
     {
@@ -552,8 +661,8 @@ int main()
         cross(fights, m, cross_switch, children, parents);
         //мутация
         mutation(mut_switch, n, m, children);
-        count_power(children, n, m, h, left, false, x1, x2);
-        rastr(x1, x2, power1, false, n);
+        count_x(children, n, m, h, left, x1, x2);
+        func(x1, x2, power1, n, kind_of_func);
         for (i = 0; i < n*2; i++)
             index[i] = i;
         quicksort(power1, index, 0, fights - 1);
@@ -614,4 +723,4 @@ int main()
 		delete [] A1[i];
 	delete[] A1;
 
-}//заменить pow
+}
