@@ -478,8 +478,7 @@ void func(float *x1, float *x2, float *power, int n, int kind_of_func, bool pare
     int i, j = 0, k;
     float ax, bx, zx1, zx2, sum;
     int *a {new int[25]{ -32, -16, 0, 16, 32, -32, -16, 0, 16, 32, -32, -16, 0, 16, 32, -32, -16, 0, 16, 32, -32, -16, 0, 16, 32}};
-    int *b {new int[25]{ -32, -32, -32, -32, -32, -16, -16, -16, -16, -16,
-    0, 0, 0, 0, 0, 16, 16, 16, 16, 16, 32, 32, 32, 32, 32}};
+    int *b {new int[25]{ -32, -32, -32, -32, -32, -16, -16, -16, -16, -16, 0, 0, 0, 0, 0, 16, 16, 16, 16, 16, 32, 32, 32, 32, 32}};
     if (parents == false)
     {
         j = n;
@@ -491,9 +490,9 @@ void func(float *x1, float *x2, float *power, int n, int kind_of_func, bool pare
     if (kind_of_func == 2)
         for (i = j; i < n; i++)
         {
-            ax = x1[i]*x1[i]*cos(pi/4.)-x2[i]*x2[i]*sin(pi/4.);
-            bx = x1[i]*x1[i]*sin(pi/4.)+x2[i]*x2[i]*cos(pi/4.);
-            power[i] = -(0.1*1.5*ax+0.1*0.8*bx-4*cos(0.8*1.5*ax)-4*cos(0.8*0.8*bx)+8);
+            ax = x1[i]*cos(pi/4.)-x2[i]*sin(pi/4.);
+            bx = x1[i]*sin(pi/4.)+x2[i]*cos(pi/4.);
+            power[i] = -(0.1*1.5*ax*ax+0.1*0.8*bx*bx-4*cos(0.8*1.5*ax)-4*cos(0.8*0.8*bx)+8);
         }
     if (kind_of_func == 3)
         for (i = j; i < n; i++)
@@ -534,10 +533,12 @@ void func(float *x1, float *x2, float *power, int n, int kind_of_func, bool pare
     {
         for (i = j; i < n; i++)
         {
+            //x1[i]=-32;
+            //x2[i]=-32;
             sum = 0;
             for(k = 0; k < 25; k++)
             {
-                sum += 1./((x1[i]-a[k])*(x1[i]-a[k])*(x1[i]-a[k])*(x1[i]-a[k])+(x2[i]-b[k])*(x2[i]-b[k])*(x2[i]-b[k])*(x2[i]-b[k]));
+                sum += 1./((k+1)+(x1[i]-a[k])*(x1[i]-a[k])*(x1[i]-a[k])*(x1[i]-a[k])+(x2[i]-b[k])*(x2[i]-b[k])*(x2[i]-b[k])*(x2[i]-b[k]));
             }
             power[i] = -(1./(1./500.+sum));
         }
@@ -547,47 +548,77 @@ void func(float *x1, float *x2, float *power, int n, int kind_of_func, bool pare
 }
 
 
-void limits(float*left, float *right, int kind_of_func)
+void limits(float*left, float *right, int kind_of_func, float* opt1, float* opt2)
 {
     if (kind_of_func == 1||kind_of_func == 2||kind_of_func == 4)
     {
         *left = -16;
         *right = 16;
+        *opt1 = 0;
+        *opt2 = 0;
     }
     if (kind_of_func == 3)
     {
         *left = -2;
         *right = 2;
+        *opt1 = 1;
+        *opt2 = 1;
     }
-    if (kind_of_func == 5||kind_of_func == 6)
+    if (kind_of_func == 5)
     {
         *left = -10;
         *right = 10;
+        *opt1 = 1;
+        *opt2 = 1;
+    }
+    if (kind_of_func == 6)
+    {
+        *left = -10;
+        *right = 10;
+        *opt1 = 0;
+        *opt2 = 0;
     }
     if (kind_of_func == 7)
     {
         *left = -2.5;
         *right = 2.5;
+        *opt1 = 0;
+        *opt2 = 0;
     }
     if (kind_of_func == 8)
     {
         *left = -5;
         *right = 5;
+        *opt1 = 0;
+        *opt2 = 0;
     }
     if (kind_of_func == 9)
     {
         *left = -4;
         *right = 4;
+        *opt1 = 0;
+        *opt2 = 0;
     }
-    if (kind_of_func == 10||kind_of_func == 11||kind_of_func == 12)
+    if (kind_of_func == 10)
     {
         *left = 0;
         *right = 4;
+        *opt1 = 0;
+        *opt2 = 0;
+    }
+    if (kind_of_func == 11||kind_of_func == 12)
+    {
+        *left = 0;
+        *right = 4;
+        *opt1 = 1.99516;
+        *opt2 = 1.99516;
     }
     if (kind_of_func == 13)
     {
         *left = -65;
         *right = 65;
+        *opt1 = -32;
+        *opt2 = -32;
     }
 }
 
@@ -597,14 +628,16 @@ int main()
 	srand(time(NULL));
 	string sel_switch = "rang";// prop, rang, tour
 	int cross_switch = 3;//1, 2, 3
-	string mut_switch = "average";//weak, average, strong
-	//плохо 2, 5, 13
-	int kind_of_func = 13;//1 - Растригина, 2 - Растригина овражная, 3 - Розенброка, 4 - Гриванка, 5 - Де Йонга, 6 - Сомбреро,
+	string mut_switch = "strong";//weak, average, strong
+	//плохо 6
+	int kind_of_func = 6;//1 - Растригина, 2 - Растригина овражная, 3 - Розенброка, 4 - Гриванка, 5 - Де Йонга, 6 - Сомбреро,
 	//7 - Катникова1, 8 - Катникова2, 9 - функция9, 10 - функция10, 11 - мультипликативная, 12 - аддитивная, 13 - лисьи норы
-	int n = 30, m = 0, s = 1, i, j, in, k, fights = n*2, globali, number_of_repeats = 100;
-	float left, right, e = 0.01, nparts, h;
+	int n = 100, m = 0, s = 1, i, j, in, k, fights = n*2, globali, i_launch, number_of_popul = 100, gener;
+	float left, right, e = 0.01, nparts, h, opt1, opt2, number = 0, reability, number_of_launch = 100, min_diff1, min_diff2, x1min,
+	x2min, powermin, sum_gener = 0, average_gener;
+	bool flag;
 
-    limits(&left, &right, kind_of_func);
+    limits(&left, &right, kind_of_func, &opt1, &opt2);
     nparts = (right - left)/e;
     while (s < nparts + 1)
     {
@@ -612,7 +645,7 @@ int main()
         m++;
     }
     h = (right - left)/(pow(2,m)-1);
-    cout << h << endl;
+    //cout << h << endl;
     m *= 2;
 
 
@@ -637,73 +670,103 @@ int main()
     float *x12 = new float[n];
     float *x22 = new float[n];
 
-
-
-
-    //инициализация
-    for (i = 0; i < n; i++)
-		for (j = 0; j < m; j++)
-			A1[i][j] = rand() % 2;
-
-	count_x(A1, n, m, h, left, x1, x2, true);
-    func(x1, x2, power1, n, kind_of_func, true);
-	cout << "Population0" << endl;
-	for (i = 0; i < n; i++)
+    //цикл запусков
+    for (i_launch = 0; i_launch < number_of_launch; i_launch++)
     {
-        cout << x1[i] <<" "<< x2[i] <<" "<< power1[i] << endl;
-    }
-	//глобальный цикл
-	for (globali = 1; globali < number_of_repeats; globali++)
-    {
-        //селекция
-        selection (sel_switch, power1, fights, n, parents, A1, m);
-        //скрещивание
-        cross(fights, m, cross_switch, children, parents);
-        //мутация
-        mutation(mut_switch, n, m, children);
-        count_x(children, n, m, h, left, x1, x2);
-        func(x1, x2, power1, n, kind_of_func);
-        for (i = 0; i < n*2; i++)
-            index[i] = i;
-        quicksort(power1, index, 0, fights - 1);
-        //создание новой популяции
-        for (i = 0, k = fights-1; i < n; i++,k--)
-        {
-            in = index[k];
-            if (in < n)
-            {
-                for (j = 0; j < m; j++)
-                    A2[i][j] = A1[in][j];
-                power2[i] = power1[k];
-                x12[i] = x1[in];
-                x22[i] = x2[in];
-            }
-            if (in >= n)
-            {
-                 for (j = 0; j < m; j++)
-                    A2[i][j] = children [in-n][j];
-                power2[i] = power1[k];
-                x12[i] = x1[in];
-                x22[i] = x2[in];
-            }
-        }
-       for (i = 0; i < n; i++)
-       {
-           power1[i] = power2[i];
-           x1[i] = x12[i];
-           x2[i] = x22[i];
-           for (j=0; j < m; j++)
-           {
-               A1[i][j]=A2[i][j];
-           }
-       }
-       cout << "Population" << globali << endl;
-       for (i = 0; i < n; i++)
+        flag = false;
+
+        //инициализация
+        for (i = 0; i < n; i++)
+            for (j = 0; j < m; j++)
+                A1[i][j] = rand() % 2;
+
+        count_x(A1, n, m, h, left, x1, x2, true);
+        func(x1, x2, power1, n, kind_of_func, true);
+        cout << "Launch " << i_launch+1 << endl;
+        /*for (i = 0; i < n; i++)
         {
             cout << x1[i] <<" "<< x2[i] <<" "<< power1[i] << endl;
-        }
-    }
+        }*/
+        //цикл поколений
+        for (globali = 1; globali < number_of_popul; globali++)
+        {
+            //селекция
+            selection (sel_switch, power1, fights, n, parents, A1, m);
+            //скрещивание
+            cross(fights, m, cross_switch, children, parents);
+            //мутация
+            mutation(mut_switch, n, m, children);
+            count_x(children, n, m, h, left, x1, x2);
+            func(x1, x2, power1, n, kind_of_func);
+            for (i = 0; i < n*2; i++)
+                index[i] = i;
+            quicksort(power1, index, 0, fights - 1);
+            //создание новой популяции
+            for (i = 0, k = fights-1; i < n; i++,k--)
+            {
+                in = index[k];
+                if (in < n)
+                {
+                    for (j = 0; j < m; j++)
+                        A2[i][j] = A1[in][j];
+                    power2[i] = power1[k];
+                    x12[i] = x1[in];
+                    x22[i] = x2[in];
+                }
+                if (in >= n)
+                {
+                     for (j = 0; j < m; j++)
+                        A2[i][j] = children [in-n][j];
+                    power2[i] = power1[k];
+                    x12[i] = x1[in];
+                    x22[i] = x2[in];
+                }
+            }
+           for (i = 0; i < n; i++)
+           {
+               power1[i] = power2[i];
+               x1[i] = x12[i];
+               x2[i] = x22[i];
+               for (j=0; j < m; j++)
+               {
+                   A1[i][j]=A2[i][j];
+               }
+           }
 
+            min_diff1 = abs(x1[0]-opt1);
+            min_diff2 = abs(x2[0]-opt2);
+            for (i = 0; i < n; i++)
+            {
+                if(abs(x1[i]-opt1) <= e&&abs(x2[i]-opt2) <= e)
+                {
+                    number+=1;
+                    cout << x1[i] <<" "<< x2[i] <<" "<< power1[i] << endl;
+                    flag = true;
+                    gener = globali;
+                    cout << gener << endl;
+                    sum_gener += gener;
+                    break;
+                }
+                if (abs(x1[i]-opt1)<= min_diff1&&abs(x2[i]-opt2)<= min_diff2)
+                {
+                    min_diff1 = abs(x1[i]-opt1);
+                    min_diff2 = abs(x2[i]-opt2);
+                    x1min = x1[i];
+                    x2min = x2[i];
+                    powermin = power1[i];
+
+                }
+            }
+            if (flag)
+                break;
+        }
+        if (flag == false)
+            cout << x1min <<" "<< x2min <<" "<< powermin << endl;
+    }
+    reability = number/number_of_launch;
+    cout << "Надежность = " << reability << endl;
+    average_gener = sum_gener/number_of_launch;
+    cout << "В среднем решение находится на  " << average_gener << " поколении" << endl;
 
     delete[] x1;
     delete[] x2;
